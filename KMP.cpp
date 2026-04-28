@@ -37,26 +37,18 @@ int BF(string T, string P)
 vector<int> getnext(string n)
 {
     vector<int> next(n.length());
-    next[0] = -1;
+    next[0] = 0;
     for (int i = 1; i < n.length(); i++)
     {
         int j = next[i - 1];
-        while (j >= 0)
+        while (j > 0 && n[j] != n[i])
         {
-            if (n[j] == n[i])
-            {
-                next[i] = j + 1;
-                break;
-            }
-            else
-            {
-                j--;
-            }
+            j = next[j - 1];
         }
-        if (j < 0)
-        {
+        if (n[j] == n[i])
+            next[i] = j + 1;
+        else
             next[i] = 0;
-        }
     }
     return next;
 }
@@ -69,7 +61,7 @@ int KMP(string T, string P)
     int j = 0;
     vector<int> next = getnext(P);
 
-    cout << "模式串的next数组为：";
+    cout << "The next array is: ";
     for (int k = 0; k < next.size(); k++)
     {
         cout << next[k] << " ";
@@ -79,14 +71,18 @@ int KMP(string T, string P)
     while (i < T.length())
     {
         count++;
-        if (j == -1 || T[i] == P[j])
+        if (T[i] == P[j])
         {
             i++;
             j++;
         }
+        else if (j > 0)
+        {
+            j = next[j - 1];
+        }
         else
         {
-            j = next[j];
+            i++;
         }
 
         if (j == P.length())
@@ -103,39 +99,35 @@ int KMP2(string T, string P)
     cout << "Locate the Pattern string with the KMP method by constructing a new string." << endl;
     int count = 0;
     string s = P + '#' + T;
-    // cout << "构造的字符串s为：" << s << endl;
     vector<int> n(s.length());
     n[0] = 0;
     for (int i = 1; i < s.length(); i++)
     {
-        // cout << "计算n[" << i << "]，当前字符s[" << i << "]=" << s[i] << endl;
         int j = n[i - 1];
-        // cout << "当前j=" << j << endl;
-        while (j >= 0)
+        while (j > 0)
         {
-            // cout << "比较s[" << j << "]=" << s[j] << "和s[" << i << "]=" << s[i] << endl;
             count++;
-            if (s[j] == s[i])
+            if (s[j] != s[i])
             {
-                n[i] = j + 1;
-                // cout << "匹配成功，n[" << i << "]=" << n[i] << endl;
-                if (n[i] == P.length())
-                {
-                    // cout << "模式串匹配成功，返回位置：" << i - P.length() - 1 << endl;
-                    cout << "Compare time is " << count << "." << endl;
-                    return i - P.length() - 1;
-                }
-                break;
+                j = n[j - 1];
             }
             else
             {
-                j--;
-                // cout << "匹配失败，j减1，当前j=" << j << endl;
+                break;
             }
         }
-        if (j < 0)
+        count++;
+        if (s[j] == s[i])
         {
-            // cout << "匹配失败，j<0，n[" << i << "]=" << 0 << endl;
+            n[i] = j + 1;
+            if (n[i] == P.length())
+            {
+                cout << "Compare time is " << count << "." << endl;
+                return i - 2 * P.length();
+            }
+        }
+        else
+        {
             n[i] = 0;
         }
     }
